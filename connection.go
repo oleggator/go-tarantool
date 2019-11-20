@@ -185,6 +185,8 @@ type Opts struct {
 	//                If no timeout period is set, it will wait forever.
 	// It is required if RateLimit is specified.
 	RLimitAction uint
+	// TCPNODELAY
+	TCPNoDelay bool
 	// Concurrency is amount of separate mutexes for request
 	// queues and buffers inside of connection.
 	// It is rounded upto nearest power of 2.
@@ -386,6 +388,13 @@ func (conn *Connection) dial() (err error) {
 	if err != nil {
 		return
 	}
+
+	if tcpConn, ok := connection.(*net.TCPConn); ok {
+		if err = tcpConn.SetNoDelay(conn.opts.TCPNoDelay); err != nil {
+			return
+		}
+	}
+
 	dc := &DeadlineIO{to: conn.opts.Timeout, c: connection}
 	r := bufio.NewReaderSize(dc, 128*1024)
 	w := bufio.NewWriterSize(dc, 128*1024)
