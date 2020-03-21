@@ -11,6 +11,7 @@ const (
 	EvalRequest      = 8
 	UpsertRequest    = 9
 	Call17Request    = 10
+	ExecuteRequest   = 11
 	PingRequest      = 64
 	SubscribeRequest = 66
 
@@ -29,6 +30,10 @@ const (
 	KeyDefTuple     = 0x28
 	KeyData         = 0x30
 	KeyError        = 0x31
+	KeyMetadata     = 0x32
+	KeySQLText      = 0x40
+	KeySQLBind      = 0x41
+	KeySQLInfo      = 0x42
 
 	// https://github.com/fl00r/go-tarantool-1.6/issues/2
 

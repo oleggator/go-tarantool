@@ -120,6 +120,13 @@ func (conn *Connection) Eval(expr string, args interface{}) (resp *Response, err
 	return conn.EvalAsync(expr, args).Get()
 }
 
+// Execute passes sql expression for evaluation.
+//
+// It is equal to conn.ExecuteAsync(space, tuple).Get().
+func (conn *Connection) Execute(expr string, args interface{}) (resp *Response, err error) {
+	return conn.ExecuteAsync(expr, args).Get()
+}
+
 // single used for conn.GetTyped for decode one tuple
 type single struct {
 	res   interface{}
@@ -210,6 +217,13 @@ func (conn *Connection) Call17Typed(functionName string, args interface{}, resul
 // It is equal to conn.EvalAsync(space, tuple).GetTyped(&result).
 func (conn *Connection) EvalTyped(expr string, args interface{}, result interface{}) (err error) {
 	return conn.EvalAsync(expr, args).GetTyped(result)
+}
+
+// ExecuteTyped passes sql expression for evaluation.
+//
+// It is equal to conn.ExecuteTyped(space, tuple).GetTyped(&result).
+func (conn *Connection) ExecuteTyped(expr string, args interface{}, result interface{}) (err error) {
+	return conn.ExecuteAsync(expr, args).GetTyped(result)
 }
 
 // SelectAsync sends select request to tarantool and returns Future.
@@ -342,6 +356,18 @@ func (conn *Connection) EvalAsync(expr string, args interface{}) *Future {
 		enc.EncodeUint64(KeyExpression)
 		enc.EncodeString(expr)
 		enc.EncodeUint64(KeyTuple)
+		return enc.Encode(args)
+	})
+}
+
+// ExecuteAsync sends a sql expression for evaluation and returns Future.
+func (conn *Connection) ExecuteAsync(expr string, args interface{}) *Future {
+	future := conn.newFuture(ExecuteRequest)
+	return future.send(conn, func(enc *msgpack.Encoder) error {
+		enc.EncodeMapLen(2)
+		enc.EncodeUint64(KeySQLText)
+		enc.EncodeString(expr)
+		enc.EncodeUint64(KeySQLBind)
 		return enc.Encode(args)
 	})
 }

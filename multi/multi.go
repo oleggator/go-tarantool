@@ -294,6 +294,10 @@ func (connMulti *ConnectionMulti) Eval(expr string, args interface{}) (resp *tar
 	return connMulti.getCurrentConnection().Eval(expr, args)
 }
 
+func (connMulti *ConnectionMulti) Execute(expr string, args interface{}) (resp *tarantool.Response, err error) {
+	return connMulti.getCurrentConnection().Execute(expr, args)
+}
+
 func (connMulti *ConnectionMulti) GetTyped(space, index interface{}, key interface{}, result interface{}) (err error) {
 	return connMulti.getCurrentConnection().GetTyped(space, index, key, result)
 }
@@ -330,6 +334,10 @@ func (connMulti *ConnectionMulti) EvalTyped(expr string, args interface{}, resul
 	return connMulti.getCurrentConnection().EvalTyped(expr, args, result)
 }
 
+func (connMulti *ConnectionMulti) ExecuteTyped(expr string, args interface{}, result interface{}) (err error) {
+	return connMulti.getCurrentConnection().ExecuteTyped(expr, args, result)
+}
+
 func (connMulti *ConnectionMulti) SelectAsync(space, index interface{}, offset, limit, iterator uint32, key interface{}) *tarantool.Future {
 	return connMulti.getCurrentConnection().SelectAsync(space, index, offset, limit, iterator, key)
 }
@@ -364,4 +372,8 @@ func (connMulti *ConnectionMulti) Call17Async(functionName string, args interfac
 
 func (connMulti *ConnectionMulti) EvalAsync(expr string, args interface{}) *tarantool.Future {
 	return connMulti.getCurrentConnection().EvalAsync(expr, args)
+}
+
+func (connMulti *ConnectionMulti) ExecuteAsync(expr string, args interface{}) *tarantool.Future {
+	return connMulti.getCurrentConnection().ExecuteAsync(expr, args)
 }

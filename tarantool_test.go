@@ -82,7 +82,7 @@ func (c *Tuple2) DecodeMsgpack(d *msgpack.Decoder) error {
 }
 
 var server = "127.0.0.1:3013"
-var spaceNo = uint32(512)
+var spaceNo = uint32(513)
 var spaceName = "test"
 var indexNo = uint32(0)
 var indexName = "primary"
@@ -1004,4 +1004,66 @@ func TestComplexStructs(t *testing.T) {
 		t.Errorf("Failed to selectTyped: incorrect data")
 		return
 	}
+}
+
+func TestSQL(t *testing.T) {
+	var err error
+	var conn *Connection
+
+	var opts = Opts{
+		Timeout: 500 * time.Millisecond,
+		User:    "sql",
+		Pass:    "sql",
+		//Concurrency: 32,
+		//RateLimit: 4*1024,
+	}
+
+	conn, err = Connect(server, opts)
+	if err != nil {
+		t.Errorf("Failed to connect: %s", err.Error())
+		return
+	}
+	if conn == nil {
+		t.Errorf("conn is nil after Connect")
+		return
+	}
+	defer conn.Close()
+
+	resp, err := conn.Execute(`
+		CREATE TABLE table1 (
+			column1 INTEGER PRIMARY KEY,
+			column2 VARCHAR(100)
+		)
+	`, []interface{}{})
+	fmt.Println("Execute Error", err)
+	fmt.Println("Execute Code", resp.Code)
+	fmt.Println("Execute Data", resp.Data)
+
+	resp, err = conn.Execute(`
+		INSERT INTO table1 VALUES (?, ?)
+	`, []interface{}{1, "A"})
+	fmt.Println("Execute Error", err)
+	fmt.Println("Execute Code", resp.Code)
+	fmt.Println("Execute Data", resp.Data)
+
+	resp, err = conn.Execute(`
+		UPDATE table1 SET column2 = ?
+	`, []interface{}{"B"})
+	fmt.Println("Execute Error", err)
+	fmt.Println("Execute Code", resp.Code)
+	fmt.Println("Execute Data", resp.Data)
+
+	resp, err = conn.Execute(`
+		SELECT * FROM table1 WHERE column1 = ?
+	`, []interface{}{1})
+	fmt.Println("Execute Error", err)
+	fmt.Println("Execute Code", resp.Code)
+	fmt.Println("Execute Data", resp.Data)
+
+	resp, err = conn.Execute(`
+		DROP TABLE table1
+	`, []interface{}{})
+	fmt.Println("Execute Error", err)
+	fmt.Println("Execute Code", resp.Code)
+	fmt.Println("Execute Data", resp.Data)
 }

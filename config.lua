@@ -6,7 +6,7 @@ box.cfg{
 
 box.once("init", function()
 local s = box.schema.space.create('test', {
-    id = 512,
+    id = 513,
     if_not_exists = true,
 })
 s:create_index('primary', {type = 'tree', parts = {1, 'uint'}, if_not_exists = true})
@@ -26,8 +26,8 @@ local st = box.schema.space.create('schematest', {
     },
 })
 st:create_index('primary', {
-    type = 'hash', 
-    parts = {1, 'uint'}, 
+    type = 'hash',
+    parts = {1, 'uint'},
     unique = true,
     if_not_exists = true,
 })
@@ -49,6 +49,10 @@ box.schema.user.create('test', {password = 'test'})
 box.schema.user.grant('test', 'execute', 'universe')
 box.schema.user.grant('test', 'read,write', 'space', 'test')
 box.schema.user.grant('test', 'read,write', 'space', 'schematest')
+
+-- sql testing
+box.schema.user.create('sql', {password = 'sql'})
+box.schema.user.grant('sql', 'read,write,execute,create,alter,drop', 'universe', '')
 end)
 
 function simple_incr(a)
@@ -61,3 +65,4 @@ console.listen '0.0.0.0:33015'
 
 --box.schema.user.revoke('guest', 'read,write,execute', 'universe')
 
+console.start()
