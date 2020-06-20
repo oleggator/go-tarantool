@@ -35,6 +35,11 @@ const (
 	KeySQLBind      = 0x41
 	KeySQLInfo      = 0x42
 
+	KeySQLInfoRowCount = 0x00
+
+	KeyFieldName = 0x00
+	KeyFieldType = 0x01
+
 	// https://github.com/fl00r/go-tarantool-1.6/issues/2
 
 	IterEq            = uint32(0) // key == x ASC order

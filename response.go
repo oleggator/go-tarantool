@@ -12,7 +12,12 @@ type Response struct {
 	Error     string // error message
 	// Data contains deserialized data for untyped requests
 	Data []interface{}
-	buf  smallBuf
+	// Fields list (only for SQL SELECT requests)
+	Fields []Field
+	// The number of rows affected by the query (only for modifying SQL requests)
+	RowsAffected int64
+
+	buf smallBuf
 }
 
 func (resp *Response) fill(b []byte) {
@@ -85,6 +90,63 @@ func (resp *Response) decodeBody() (err error) {
 				}
 				if resp.Data, ok = res.([]interface{}); !ok {
 					return fmt.Errorf("result is not array: %v", res)
+				}
+			case KeyMetadata:
+				fieldCount, err := d.DecodeArrayLen()
+				if err != nil {
+					return err
+				}
+				fields := make([]Field, fieldCount)
+				for i := 0; i < fieldCount; i++ {
+					fields[i].Id = uint32(i)
+					fieldMapLen, err := d.DecodeMapLen()
+					if err != nil {
+						return err
+					}
+					for ; fieldMapLen > 0; fieldMapLen-- {
+						var key int
+						if key, err = resp.smallInt(d); err != nil {
+							return err
+						}
+						switch key {
+						case KeyFieldName:
+							if fields[i].Name, err = d.DecodeString(); err != nil {
+								return err
+							}
+						case KeyFieldType:
+							if fields[i].Type, err = d.DecodeString(); err != nil {
+								return err
+							}
+						default:
+							if err = d.Skip(); err != nil {
+								return err
+							}
+						}
+					}
+				}
+				resp.Fields = fields
+			case KeySQLInfo:
+				sqlInfoLen, err := d.DecodeMapLen()
+				if err != nil {
+					return err
+				}
+				for ; sqlInfoLen > 0; sqlInfoLen-- {
+					var key int
+					if key, err = resp.smallInt(d); err != nil {
+						return err
+					}
+					switch key {
+					case KeySQLInfoRowCount:
+						rowCount, err := d.DecodeInt64()
+						if err != nil {
+							return err
+						}
+						resp.RowsAffected = rowCount
+					default:
+						if err = d.Skip(); err != nil {
+							return err
+						}
+					}
 				}
 			case KeyError:
 				if resp.Error, err = d.DecodeString(); err != nil {

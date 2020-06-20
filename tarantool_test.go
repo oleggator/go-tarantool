@@ -1037,21 +1037,21 @@ func TestSQL(t *testing.T) {
 	`, []interface{}{})
 	fmt.Println("Execute Error", err)
 	fmt.Println("Execute Code", resp.Code)
-	fmt.Println("Execute Data", resp.Data)
+	fmt.Println("Execute RowsAffected", resp.RowsAffected)
 
 	resp, err = conn.Execute(`
 		INSERT INTO table1 VALUES (?, ?)
 	`, []interface{}{1, "A"})
 	fmt.Println("Execute Error", err)
 	fmt.Println("Execute Code", resp.Code)
-	fmt.Println("Execute Data", resp.Data)
+	fmt.Println("Execute RowsAffected", resp.RowsAffected)
 
 	resp, err = conn.Execute(`
 		UPDATE table1 SET column2 = ?
 	`, []interface{}{"B"})
 	fmt.Println("Execute Error", err)
 	fmt.Println("Execute Code", resp.Code)
-	fmt.Println("Execute Data", resp.Data)
+	fmt.Println("Execute RowsAffected", resp.RowsAffected)
 
 	resp, err = conn.Execute(`
 		SELECT * FROM table1 WHERE column1 = ?
@@ -1059,11 +1059,12 @@ func TestSQL(t *testing.T) {
 	fmt.Println("Execute Error", err)
 	fmt.Println("Execute Code", resp.Code)
 	fmt.Println("Execute Data", resp.Data)
+	fmt.Println("Execute Fields", resp.Fields)
 
 	resp, err = conn.Execute(`
 		DROP TABLE table1
 	`, []interface{}{})
 	fmt.Println("Execute Error", err)
 	fmt.Println("Execute Code", resp.Code)
-	fmt.Println("Execute Data", resp.Data)
+	fmt.Println("Execute RowsAffected", resp.RowsAffected)
 }
