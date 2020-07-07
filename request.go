@@ -127,6 +127,13 @@ func (conn *Connection) Execute(expr string, args interface{}) (resp *Response, 
 	return conn.ExecuteAsync(expr, args).Get()
 }
 
+// ExecuteStmt passes sql prepared statement for evaluation.
+//
+// It is equal to conn.ExecuteStmtAsync(stmtID, tuple).Get().
+func (conn *Connection) ExecuteStmt(stmtID int, args interface{}) (resp *Response, err error) {
+	return conn.ExecuteStmtAsync(stmtID, args).Get()
+}
+
 // single used for conn.GetTyped for decode one tuple
 type single struct {
 	res   interface{}
@@ -221,9 +228,16 @@ func (conn *Connection) EvalTyped(expr string, args interface{}, result interfac
 
 // ExecuteTyped passes sql expression for evaluation.
 //
-// It is equal to conn.ExecuteTyped(space, tuple).GetTyped(&result).
+// It is equal to conn.ExecuteAsync(expr, tuple).GetTyped(&result).
 func (conn *Connection) ExecuteTyped(expr string, args interface{}, result interface{}) (err error) {
 	return conn.ExecuteAsync(expr, args).GetTyped(result)
+}
+
+// ExecuteStmtTyped passes sql prepared statement for evaluation.
+//
+// It is equal to conn.ExecuteStmtAsync(stmtID, tuple).GetTyped(&result).
+func (conn *Connection) ExecuteStmtTyped(stmtID int, args interface{}, result interface{}) (err error) {
+	return conn.ExecuteStmtAsync(stmtID, args).GetTyped(result)
 }
 
 // SelectAsync sends select request to tarantool and returns Future.
@@ -367,6 +381,18 @@ func (conn *Connection) ExecuteAsync(expr string, args interface{}) *Future {
 		enc.EncodeMapLen(2)
 		enc.EncodeUint64(KeySQLText)
 		enc.EncodeString(expr)
+		enc.EncodeUint64(KeySQLBind)
+		return enc.Encode(args)
+	})
+}
+
+// ExecuteAsync sends a sql prepared statement for evaluation and returns Future.
+func (conn *Connection) ExecuteStmtAsync(stmtID int, args interface{}) *Future {
+	future := conn.newFuture(ExecuteRequest)
+	return future.send(conn, func(enc *msgpack.Encoder) error {
+		enc.EncodeMapLen(2)
+		enc.EncodeUint64(KeyStmtID)
+		enc.EncodeInt(stmtID)
 		enc.EncodeUint64(KeySQLBind)
 		return enc.Encode(args)
 	})

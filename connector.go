@@ -18,6 +18,7 @@ type Connector interface {
 	Call17(functionName string, args interface{}) (resp *Response, err error)
 	Eval(expr string, args interface{}) (resp *Response, err error)
 	Execute(expr string, args interface{}) (resp *Response, err error)
+	ExecuteStmt(stmtID int, args interface{}) (resp *Response, err error)
 
 	GetTyped(space, index interface{}, key interface{}, result interface{}) (err error)
 	SelectTyped(space, index interface{}, offset, limit, iterator uint32, key interface{}, result interface{}) (err error)
@@ -29,6 +30,7 @@ type Connector interface {
 	Call17Typed(functionName string, args interface{}, result interface{}) (err error)
 	EvalTyped(expr string, args interface{}, result interface{}) (err error)
 	ExecuteTyped(expr string, args interface{}, result interface{}) (err error)
+	ExecuteStmtTyped(stmtID int, args interface{}, result interface{}) (err error)
 
 	SelectAsync(space, index interface{}, offset, limit, iterator uint32, key interface{}) *Future
 	InsertAsync(space interface{}, tuple interface{}) *Future
@@ -40,4 +42,5 @@ type Connector interface {
 	Call17Async(functionName string, args interface{}) *Future
 	EvalAsync(expr string, args interface{}) *Future
 	ExecuteAsync(expr string, args interface{}) *Future
+	ExecuteStmtAsync(stmtID int, args interface{}) *Future
 }

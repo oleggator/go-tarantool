@@ -34,6 +34,7 @@ const (
 	KeySQLText      = 0x40
 	KeySQLBind      = 0x41
 	KeySQLInfo      = 0x42
+	KeyStmtID       = 0x43
 
 	KeySQLInfoRowCount = 0x00
 
