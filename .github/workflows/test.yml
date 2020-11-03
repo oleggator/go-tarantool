@@ -1,0 +1,25 @@
+name: Test
+on: [push]
+jobs:
+  test:
+    strategy:
+      matrix:
+        go_image:
+          - 'golang:1.13'
+          - 'golang:1.14'
+          - 'golang:1.15'
+        tarantool_image:
+          - 'tarantool/tarantool:2.x-centos7'
+          - 'tarantool/tarantool:1.x-centos7'
+    runs-on: ubuntu-latest
+    container: ${{ matrix.go_image }}
+    services:
+      tarantool:
+        image: ${{ matrix.tarantool_image }}
+        volumes:
+          $GITHUB_WORKSPACE/config.lua:/opt/tarantool/config.lua
+        ports:
+          - 3013:3013
+    steps:
+      - uses: actions/checkout@v1
+      - run: go test github.com/tarantool/go-tarantool -v
